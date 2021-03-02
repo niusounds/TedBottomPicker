@@ -127,6 +127,7 @@
             android:layout_gravity="bottom"
             android:layout_marginHorizontal="16dp"
             android:layout_marginVertical="24dp"
+            android:backgroundTint="?colorPrimary"
             android:minHeight="56dp"
             android:text="@string/done"
             android:textSize="16sp"
