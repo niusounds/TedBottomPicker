@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     private GalleryAdapter imageGalleryAdapter;
     private View view_title_container;
     private TextView tv_title;
-    private Button btn_done;
+    private MaterialButton btn_done;
 
     private FrameLayout selected_photos_container_frame;
     private LinearLayout selected_photos_container;

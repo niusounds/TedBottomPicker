@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     >
 
     <RelativeLayout
@@ -81,7 +83,8 @@
                 android:animateLayoutChanges="false"
                 android:gravity="left"
                 android:orientation="horizontal"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                />
         </HorizontalScrollView>
 
         <TextView
@@ -91,7 +94,8 @@
             android:layout_gravity="center"
             android:text="@string/no_image"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?attr/colorAccent"/>
+            android:textColor="?attr/colorAccent"
+            />
     </FrameLayout>
 
     <!--
@@ -116,15 +120,17 @@
             />
 
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_done"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="24dp"
+            android:minHeight="56dp"
             android:text="@string/done"
-            android:textColor="?attr/colorAccent"
             android:textSize="16sp"
+            app:cornerRadius="24dp"
             />
     </FrameLayout>
 </LinearLayout>
