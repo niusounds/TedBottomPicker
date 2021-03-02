@@ -15,14 +15,15 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
     private int spanCount;
     private int spacing;
+    private int extraBottomPadding;
     private boolean includeEdge;
 
 
-    public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+    public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge, int extraBottomPadding) {
         this.spanCount = spanCount;
         this.spacing = spacing;
         this.includeEdge = includeEdge;
-
+        this.extraBottomPadding = extraBottomPadding;
     }
 
     @Override
@@ -46,6 +47,11 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
                 if (position >= spanCount) {
                     outRect.top = spacing; // item top
                 }
+            }
+
+            // Add extra bottom padding for last elements
+            if (position >= state.getItemCount() - spanCount) {
+                outRect.bottom = extraBottomPadding;
             }
         } else {
             outRect.left = 0;
