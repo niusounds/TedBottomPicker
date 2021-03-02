@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
@@ -185,6 +187,14 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         if (builder.completeButtonText != null) {
             btn_done.setText(builder.completeButtonText);
+        }
+
+        if (builder.buttonColor != null) {
+            btn_done.setBackgroundTintList(ColorStateList.valueOf(builder.buttonColor));
+        }
+
+        if (builder.buttonTextColor != null) {
+            btn_done.setTextColor(builder.buttonTextColor);
         }
 
         btn_done.setOnClickListener(new View.OnClickListener() {
@@ -641,6 +651,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         private String emptySelectionText;
         private String selectMaxCountErrorText;
         private String selectMinCountErrorText;
+        private Integer buttonTextColor;
+        private Integer buttonColor;
 
         public BaseBuilder(@NonNull FragmentActivity fragmentActivity) {
 
@@ -849,6 +861,16 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T showVideoMedia() {
             this.mediaType = MediaType.VIDEO;
+            return (T) this;
+        }
+
+        public T setButtonColor(@ColorInt int color) {
+            this.buttonColor = color;
+            return (T) this;
+        }
+
+        public T setButtonTextColor(@ColorInt int color) {
+            this.buttonTextColor = color;
             return (T) this;
         }
 
