@@ -90,6 +90,10 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            // Simulate fixed bottom button
+            if (slideOffset >= 0) {
+                btn_done.setTranslationY(-bottomSheet.getTop());
+            }
         }
     };
 
@@ -138,6 +142,9 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             }
 
         }
+
+        // Simulate fixed bottom button
+        dialog.setOnShowListener(dialog1 -> mBottomSheetBehaviorCallback.onSlide((View) contentView.getParent(), 0));
 
         if (builder == null) {
             dismissAllowingStateLoss();
@@ -233,7 +240,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         rc_gallery.setLayoutManager(gridLayoutManager);
-        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), builder.spacing, builder.includeEdgeSpacing));
+        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), builder.spacing, builder.includeEdgeSpacing, builder.extraBottomPadding));
         updateAdapter();
     }
 
@@ -625,6 +632,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         private int spacing = 1;
         private boolean includeEdgeSpacing = false;
         private int peekHeight = -1;
+        private int extraBottomPadding = -1;
         private int titleBackgroundResId;
         private int selectMaxCount = Integer.MAX_VALUE;
         private int selectMinCount = 0;
@@ -640,6 +648,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             setCameraTile(R.drawable.ic_camera);
             setGalleryTile(R.drawable.ic_gallery);
             setSpacingResId(R.dimen.tedbottompicker_grid_layout_margin);
+            setExtraBottomPaddingId(R.dimen.tedbottompicker_grid_padding_bottom);
         }
 
         public T setCameraTile(@DrawableRes int cameraTileResId) {
@@ -654,6 +663,11 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T setSpacingResId(@DimenRes int dimenResId) {
             this.spacing = fragmentActivity.getResources().getDimensionPixelSize(dimenResId);
+            return (T) this;
+        }
+
+        public T setExtraBottomPaddingId(@DimenRes int dimenResId) {
+            this.extraBottomPadding = fragmentActivity.getResources().getDimensionPixelSize(dimenResId);
             return (T) this;
         }
 

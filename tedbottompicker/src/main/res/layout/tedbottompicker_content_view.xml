@@ -13,25 +13,12 @@
         android:layout_height="wrap_content"
         >
 
-
-        <Button
-            android:id="@+id/btn_done"
-            style="?borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:text="@string/done"
-            android:textColor="?attr/colorAccent"
-            android:textSize="16sp"/>
-
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_margin="16dp"
-            android:layout_toLeftOf="@id/btn_done"
             android:text="@string/tedbottompicker_title"
             android:textSize="16sp"
             />
@@ -117,10 +104,27 @@
             />
     -->
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rc_gallery"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        >
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rc_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="16dp"
+            android:text="@string/done"
+            android:textColor="?attr/colorAccent"
+            android:textSize="16sp"
+            />
+    </FrameLayout>
 </LinearLayout>
