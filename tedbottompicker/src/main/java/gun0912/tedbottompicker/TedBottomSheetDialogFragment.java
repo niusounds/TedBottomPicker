@@ -95,7 +95,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             // Simulate fixed bottom button
             if (slideOffset >= 0) {
-                btn_done.setTranslationY(-bottomSheet.getTop());
+                final BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+                btn_done.setTranslationY(-(bottomSheet.getTop() - behavior.getExpandedOffset()));
             }
         }
     };
@@ -139,7 +140,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
                 (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
         if (behavior instanceof BottomSheetBehavior) {
-            ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
+            ((BottomSheetBehavior) behavior).addBottomSheetCallback(mBottomSheetBehaviorCallback);
             if (builder != null && builder.peekHeight > 0) {
                 ((BottomSheetBehavior) behavior).setPeekHeight(builder.peekHeight);
             }
@@ -251,7 +252,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         rc_gallery.setLayoutManager(gridLayoutManager);
-        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), builder.spacing, builder.includeEdgeSpacing, builder.extraBottomPadding));
+        rc_gallery.addItemDecoration(new GridSpacingItemDecoration(gridLayoutManager.getSpanCount(), builder.spacing, builder.includeEdgeSpacing, isMultiSelect() ? builder.extraBottomPadding : 0));
         updateAdapter();
     }
 

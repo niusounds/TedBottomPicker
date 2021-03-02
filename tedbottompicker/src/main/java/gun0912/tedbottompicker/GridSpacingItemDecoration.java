@@ -50,7 +50,8 @@ public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
             }
 
             // Add extra bottom padding for last elements
-            if (position >= state.getItemCount() - spanCount) {
+            int lastCount = (state.getItemCount() % spanCount) == 0 ? spanCount : state.getItemCount() % spanCount;
+            if (position >= state.getItemCount() - lastCount) {
                 outRect.bottom = extraBottomPadding;
             }
         } else {
