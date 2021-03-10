@@ -192,6 +192,7 @@ You can customize something ...<br />
 ## License 
  ```code
 Copyright 2017 Ted Park
+Copyright 2021 Yuya Matsuo
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
