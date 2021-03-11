@@ -23,6 +23,7 @@ import gun0912.tedbottompicker.Content;
 import gun0912.tedbottompicker.R;
 import gun0912.tedbottompicker.TedBottomSheetDialogFragment;
 import gun0912.tedbottompicker.Type;
+import gun0912.tedbottompicker.util.StringUtil;
 import gun0912.tedbottompicker.view.TedSquareFrameLayout;
 import gun0912.tedbottompicker.view.TedSquareImageView;
 
@@ -49,9 +50,14 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
         Cursor cursor = null;
         try {
-            String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                + " OR "
-                + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+            List<String> selections = new ArrayList<>();
+            if (builder.filterType.contains(Type.Image)) {
+                selections.add(MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE);
+            }
+            if (builder.filterType.contains(Type.Video)) {
+                selections.add(MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
+            }
+            String selection = StringUtil.join(selections, " OR ");
             String[] columns = {
                 MediaStore.Files.FileColumns.DATA,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,

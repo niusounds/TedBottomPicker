@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
 
                     TedBottomPicker.with(MainActivity.this)
                         //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
+//                        .setFilterType(Type.Image) // for image only
+//                        .setFilterType(Type.Video) // for video only
                         .setTitle("Pick photos")
                         .setCompleteButtonText("Done")
                         .setEmptySelectionText("No Select")

@@ -39,7 +39,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import gun0912.tedbottompicker.adapter.GalleryAdapter;
 
@@ -399,6 +403,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     public abstract static class BaseBuilder<T extends BaseBuilder> {
 
+        public Set<Type> filterType = new HashSet<>(Arrays.asList(Type.Image, Type.Video));
         public int previewMaxCount = 25;
         public Drawable selectedForegroundDrawable;
         public ImageProvider imageProvider;
@@ -433,6 +438,11 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
             setSpacingResId(R.dimen.tedbottompicker_grid_layout_margin);
             setExtraBottomPaddingId(R.dimen.tedbottompicker_grid_padding_bottom);
+        }
+
+        public T setFilterType(Type... types) {
+            this.filterType = new HashSet<>(Arrays.asList(types));
+            return (T) this;
         }
 
         public T setSpacingResId(@DimenRes int dimenResId) {
