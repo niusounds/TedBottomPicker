@@ -5,13 +5,14 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.ViewGroup;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -146,12 +147,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
             Uri uri = pickerTile.getImageUri();
             if (builder.imageProvider == null) {
                 Glide.with(context)
-                        .load(uri)
-                        .thumbnail(0.1f)
-                        .apply(new RequestOptions().centerCrop()
-                                .placeholder(R.drawable.ic_gallery)
-                                .error(R.drawable.img_error))
-                        .into(holder.iv_thumbnail);
+                    .load(uri)
+                    .thumbnail(0.1f)
+                    .apply(new RequestOptions().centerCrop()
+                        .placeholder(R.drawable.ic_gallery)
+                        .error(R.drawable.img_error))
+                    .into(holder.iv_thumbnail);
             } else {
                 builder.imageProvider.onProvideImage(holder.iv_thumbnail, uri);
             }
@@ -197,7 +198,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     }
 
     public void setOnItemClickListener(
-            OnItemClickListener onItemClickListener) {
+        OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 

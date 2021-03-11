@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -13,43 +12,38 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
-import androidx.annotation.DimenRes;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -137,7 +131,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         View contentView = View.inflate(getContext(), R.layout.tedbottompicker_content_view, null);
         dialog.setContentView(contentView);
         CoordinatorLayout.LayoutParams layoutParams =
-                (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
+            (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
         if (behavior instanceof BottomSheetBehavior) {
             ((BottomSheetBehavior) behavior).addBottomSheetCallback(mBottomSheetBehaviorCallback);
@@ -258,9 +252,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     private void updateAdapter() {
 
-        imageGalleryAdapter = new GalleryAdapter(
-                getActivity()
-                , builder);
+        imageGalleryAdapter = new GalleryAdapter(getActivity(), builder);
         rc_gallery.setAdapter(imageGalleryAdapter);
         imageGalleryAdapter.setOnItemClickListener(new GalleryAdapter.OnItemClickListener() {
             @Override
@@ -270,10 +262,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
                 switch (pickerTile.getTileType()) {
                     case GalleryAdapter.PickerTile.CAMERA:
-                        startCameraIntent();
                         break;
                     case GalleryAdapter.PickerTile.GALLERY:
-                        startGalleryIntent();
                         break;
                     case GalleryAdapter.PickerTile.IMAGE:
                         if (pickerTile.getImageUri() != null) {
@@ -334,13 +324,13 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         if (builder.imageProvider == null) {
             Glide.with(getActivity())
-                    .load(uri)
-                    .thumbnail(0.1f)
-                    .apply(new RequestOptions()
-                            .centerCrop()
-                            .placeholder(R.drawable.ic_gallery)
-                            .error(R.drawable.img_error))
-                    .into(thumbnail);
+                .load(uri)
+                .thumbnail(0.1f)
+                .apply(new RequestOptions()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_gallery)
+                    .error(R.drawable.img_error))
+                .into(thumbnail);
         } else {
             builder.imageProvider.onProvideImage(thumbnail, uri);
         }
@@ -395,37 +385,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     }
 
-    private void startCameraIntent() {
-        Intent cameraInent;
-        File mediaFile;
-
-        if (builder.mediaType == BaseBuilder.MediaType.IMAGE) {
-            cameraInent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            mediaFile = getImageFile();
-        } else {
-            cameraInent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            mediaFile = getVideoFile();
-        }
-
-        if (cameraInent.resolveActivity(getActivity().getPackageManager()) == null) {
-            errorMessage("This Application do not have Camera Application");
-            return;
-        }
-
-
-        Uri photoURI = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", mediaFile);
-
-        List<ResolveInfo> resolvedIntentActivities = getContext().getPackageManager().queryIntentActivities(cameraInent, PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-            String packageName = resolvedIntentInfo.activityInfo.packageName;
-            getContext().grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-
-        cameraInent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-
-        startActivityForResult(cameraInent, REQUEST_CODE_CAMERA);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -453,9 +412,9 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
                 storageDir.mkdirs();
 
             imageFile = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".jpg",         /* suffix */
-                    storageDir      /* directory */
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
             );
 
 
@@ -482,9 +441,9 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
                 storageDir.mkdirs();
 
             videoFile = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".mp4",         /* suffix */
-                    storageDir      /* directory */
+                imageFileName,  /* prefix */
+                ".mp4",         /* suffix */
+                storageDir      /* directory */
             );
 
 
@@ -507,26 +466,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         } else {
             builder.onErrorListener.onError(errorMessage);
         }
-    }
-
-    private void startGalleryIntent() {
-        Intent galleryIntent;
-        Uri uri;
-        if (builder.mediaType == BaseBuilder.MediaType.IMAGE) {
-            galleryIntent = new Intent(Intent.ACTION_PICK);
-            galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        } else {
-            galleryIntent = new Intent(Intent.ACTION_PICK);
-            galleryIntent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
-
-        }
-
-        if (galleryIntent.resolveActivity(getActivity().getPackageManager()) == null) {
-            errorMessage("This Application do not have Gallery Application");
-            return;
-        }
-
-        startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
     }
 
     private void errorMessage() {
@@ -630,8 +569,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         public boolean showGallery = true;
         public int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
         public int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
-        @MediaType
-        public int mediaType = MediaType.IMAGE;
         protected FragmentActivity fragmentActivity;
         OnImageSelectedListener onImageSelectedListener;
         OnMultiImageSelectedListener onMultiImageSelectedListener;
@@ -860,11 +797,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             return (T) this;
         }
 
-        public T showVideoMedia() {
-            this.mediaType = MediaType.VIDEO;
-            return (T) this;
-        }
-
         public T setButtonColor(@ColorInt int color) {
             this.buttonColor = color;
             return (T) this;
@@ -877,7 +809,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public TedBottomSheetDialogFragment create() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                    && ContextCompat.checkSelfPermission(fragmentActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(fragmentActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 throw new RuntimeException("Missing required WRITE_EXTERNAL_STORAGE permission. Did you remember to request it first?");
             }
 
@@ -888,13 +820,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             TedBottomSheetDialogFragment customBottomSheetDialogFragment = new TedBottomSheetDialogFragment();
             customBottomSheetDialogFragment.builder = (T) this;
             return customBottomSheetDialogFragment;
-        }
-
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef({MediaType.IMAGE, MediaType.VIDEO})
-        public @interface MediaType {
-            int IMAGE = 1;
-            int VIDEO = 2;
         }
 
 

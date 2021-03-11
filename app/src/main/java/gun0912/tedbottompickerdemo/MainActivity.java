@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
                             .setSelectedUri(selectedUri)
                             .showGalleryTile(false)
                             .showCameraTile(false)
-                            //.showVideoMedia()
                             .show(uri -> {
                                 Log.d("ted", "uri: " + uri);
                                 Log.d("ted", "uri.getPath(): " + uri.getPath());
@@ -145,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
                     singleImageDisposable = TedRxBottomPicker.with(MainActivity.this)
                             //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
                             .setSelectedUri(selectedUri)
-                            //.showVideoMedia()
                             .setPeekHeight(1200)
                             .show()
                             .subscribe(uri -> {
