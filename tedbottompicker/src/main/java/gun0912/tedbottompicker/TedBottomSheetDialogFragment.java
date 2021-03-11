@@ -55,8 +55,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     private LinearLayout selected_photos_container;
 
     private TextView selected_photos_empty;
-    private List<Uri> selectedUriList;
-    private List<Uri> tempUriList;
+    private List<Content> selectedUriList;
+    private List<Content> tempUriList;
     private RecyclerView rc_gallery;
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
 
@@ -132,7 +132,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
 
         if (builder.onMultiImageSelectedListener != null && tempUriList != null) {
-            for (Uri uri : tempUriList) {
+            for (Content uri : tempUriList) {
                 addUri(uri);
             }
         }
@@ -230,40 +230,28 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             @Override
             public void onItemClick(View view, int position) {
 
-                GalleryAdapter.PickerTile pickerTile = imageGalleryAdapter.getItem(position);
-
-                switch (pickerTile.getTileType()) {
-                    case GalleryAdapter.PickerTile.IMAGE:
-                        if (pickerTile.getImageUri() != null) {
-                            complete(pickerTile.getImageUri());
-                        }
-
-                        break;
-
-                    default:
-                        errorMessage();
-                }
-
+                Content pickerTile = imageGalleryAdapter.getItem(position);
+                complete(pickerTile);
             }
         });
     }
 
-    private void complete(final Uri uri) {
+    private void complete(final Content content) {
         if (isMultiSelect()) {
-            if (selectedUriList.contains(uri)) {
-                removeImage(uri);
+            if (selectedUriList.contains(content)) {
+                removeImage(content);
             } else {
-                addUri(uri);
+                addUri(content);
             }
 
         } else {
-            builder.onImageSelectedListener.onImageSelected(uri);
+            builder.onImageSelectedListener.onImageSelected(content);
             dismissAllowingStateLoss();
         }
 
     }
 
-    private void addUri(final Uri uri) {
+    private void addUri(final Content content) {
         if (selectedUriList.size() == builder.selectMaxCount) {
             String message;
             if (builder.selectMaxCountErrorText != null) {
@@ -277,12 +265,12 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         }
 
 
-        selectedUriList.add(uri);
+        selectedUriList.add(content);
 
         final View rootView = LayoutInflater.from(getActivity()).inflate(R.layout.tedbottompicker_selected_item, null);
         ImageView thumbnail = rootView.findViewById(R.id.selected_photo);
         ImageView iv_close = rootView.findViewById(R.id.iv_close);
-        rootView.setTag(uri);
+        rootView.setTag(content);
 
         selected_photos_container.addView(rootView, 0);
 
@@ -292,7 +280,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         if (builder.imageProvider == null) {
             Glide.with(getActivity())
-                .load(uri)
+                .load(content.getUri())
                 .thumbnail(0.1f)
                 .apply(new RequestOptions()
                     .centerCrop()
@@ -300,7 +288,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
                     .error(R.drawable.img_error))
                 .into(thumbnail);
         } else {
-            builder.imageProvider.onProvideImage(thumbnail, uri);
+            builder.imageProvider.onProvideImage(thumbnail, content.getUri());
         }
 
 
@@ -311,18 +299,18 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         iv_close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                removeImage(uri);
+                removeImage(content);
 
             }
         });
 
 
         updateSelectedView();
-        imageGalleryAdapter.setSelectedUriList(selectedUriList, uri);
+        imageGalleryAdapter.setSelectedUriList(selectedUriList, content);
 
     }
 
-    private void removeImage(Uri uri) {
+    private void removeImage(Content uri) {
 
         selectedUriList.remove(uri);
 
@@ -394,11 +382,11 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     }
 
     public interface OnMultiImageSelectedListener {
-        void onImagesSelected(List<Uri> uriList);
+        void onImagesSelected(List<Content> uriList);
     }
 
     public interface OnImageSelectedListener {
-        void onImageSelected(Uri uri);
+        void onImageSelected(Content uri);
     }
 
     public interface OnErrorListener {
@@ -599,11 +587,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T setImageProvider(ImageProvider imageProvider) {
             this.imageProvider = imageProvider;
-            return (T) this;
-        }
-
-        public T setSelectedUriList(List<Uri> selectedUriList) {
-            this.selectedUriList = selectedUriList;
             return (T) this;
         }
 
