@@ -5,25 +5,24 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import gun0912.tedbottompicker.Content;
 import gun0912.tedbottompicker.R;
 import gun0912.tedbottompicker.TedBottomSheetDialogFragment;
+import gun0912.tedbottompicker.Type;
 import gun0912.tedbottompicker.view.TedSquareFrameLayout;
 import gun0912.tedbottompicker.view.TedSquareImageView;
 
@@ -33,11 +32,11 @@ import gun0912.tedbottompicker.view.TedSquareImageView;
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryViewHolder> {
 
 
-    private ArrayList<PickerTile> pickerTiles;
+    private ArrayList<Content> pickerTiles;
     private Context context;
     private TedBottomSheetDialogFragment.BaseBuilder builder;
     private OnItemClickListener onItemClickListener;
-    private List<Uri> selectedUriList;
+    private List<Content> selectedUriList;
 
 
     public GalleryAdapter(Context context, TedBottomSheetDialogFragment.BaseBuilder builder) {
@@ -48,33 +47,19 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         pickerTiles = new ArrayList<>();
         selectedUriList = new ArrayList<>();
 
-        if (builder.showCamera) {
-            pickerTiles.add(new PickerTile(PickerTile.CAMERA));
-        }
-
-        if (builder.showGallery) {
-            pickerTiles.add(new PickerTile(PickerTile.GALLERY));
-        }
-
         Cursor cursor = null;
         try {
-            String[] columns;
-            String orderBy;
-            Uri uri;
-            if (builder.mediaType == TedBottomSheetDialogFragment.BaseBuilder.MediaType.IMAGE) {
-                uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                columns = new String[]{MediaStore.Images.Media.DATA};
-                orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            } else {
-                uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                columns = new String[]{MediaStore.Video.VideoColumns.DATA};
-                orderBy = MediaStore.Video.VideoColumns.DATE_ADDED + " DESC";
-            }
+            String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                + " OR "
+                + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+            String[] columns = {
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+            };
+            String orderBy = MediaStore.Files.FileColumns.DATE_ADDED + " DESC";
+            Uri uri = MediaStore.Files.getContentUri("external");
 
-
-
-
-            cursor = context.getApplicationContext().getContentResolver().query(uri, columns, null, null, orderBy);
+            cursor = context.getApplicationContext().getContentResolver().query(uri, columns, selection, null, orderBy);
             //imageCursor = sContext.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
 
 
@@ -83,15 +68,12 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                 int count = 0;
                 while (cursor.moveToNext() && count < builder.previewMaxCount) {
 
-                    String dataIndex;
-                    if (builder.mediaType == TedBottomSheetDialogFragment.BaseBuilder.MediaType.IMAGE) {
-                        dataIndex = MediaStore.Images.Media.DATA;
-                    }else{
-                        dataIndex = MediaStore.Video.VideoColumns.DATA;
-                    }
+                    String dataIndex = MediaStore.Files.FileColumns.DATA;
                     String imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex));
+                    int mediaType = cursor.getInt(cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE));
                     File imageFile = new File(imageLocation);
-                    pickerTiles.add(new PickerTile(Uri.fromFile(imageFile)));
+                    final Type type = mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE ? Type.Image : Type.Video;
+                    pickerTiles.add(new Content(Uri.fromFile(imageFile), type));
                     count++;
 
                 }
@@ -109,16 +91,16 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
     }
 
-    public void setSelectedUriList(List<Uri> selectedUriList, @NonNull Uri uri) {
+    public void setSelectedUriList(List<Content> selectedUriList, @NonNull Content uri) {
         this.selectedUriList = selectedUriList;
 
         int position = -1;
 
 
-        PickerTile pickerTile;
+        Content pickerTile;
         for (int i = 0; i < pickerTiles.size(); i++) {
             pickerTile = pickerTiles.get(i);
-            if (pickerTile.isImageTile() && uri.equals(pickerTile.getImageUri())) {
+            if (uri.equals(pickerTile)) {
                 position = i;
                 break;
             }
@@ -142,37 +124,26 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     @Override
     public void onBindViewHolder(@NonNull final GalleryViewHolder holder, int position) {
 
-        PickerTile pickerTile = getItem(position);
+        Content pickerTile = getItem(position);
 
 
         boolean isSelected = false;
 
-        if (pickerTile.isCameraTile()) {
-            holder.iv_thumbnail.setBackgroundResource(builder.cameraTileBackgroundResId);
-            holder.iv_thumbnail.setImageDrawable(builder.cameraTileDrawable);
-        } else if (pickerTile.isGalleryTile()) {
-            holder.iv_thumbnail.setBackgroundResource(builder.galleryTileBackgroundResId);
-            holder.iv_thumbnail.setImageDrawable(builder.galleryTileDrawable);
-
+        Uri uri = pickerTile.getUri();
+        if (builder.imageProvider == null) {
+            Glide.with(context)
+                .load(uri)
+                .thumbnail(0.1f)
+                .apply(new RequestOptions().centerCrop()
+                    .placeholder(R.drawable.ic_gallery)
+                    .error(R.drawable.img_error))
+                .into(holder.iv_thumbnail);
         } else {
-            Uri uri = pickerTile.getImageUri();
-            if (builder.imageProvider == null) {
-                Glide.with(context)
-                        .load(uri)
-                        .thumbnail(0.1f)
-                        .apply(new RequestOptions().centerCrop()
-                                .placeholder(R.drawable.ic_gallery)
-                                .error(R.drawable.img_error))
-                        .into(holder.iv_thumbnail);
-            } else {
-                builder.imageProvider.onProvideImage(holder.iv_thumbnail, uri);
-            }
-
-
-            isSelected = selectedUriList.contains(uri);
-
-
+            builder.imageProvider.onProvideImage(holder.iv_thumbnail, uri);
         }
+
+
+        isSelected = selectedUriList.contains(uri);
 
 
         if (holder.root != null) {
@@ -199,7 +170,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         }
     }
 
-    public PickerTile getItem(int position) {
+    public Content getItem(int position) {
         return pickerTiles.get(position);
     }
 
@@ -209,7 +180,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
     }
 
     public void setOnItemClickListener(
-            OnItemClickListener onItemClickListener) {
+        OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -217,75 +188,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         void onItemClick(View view, int position);
     }
 
-
-    public static class PickerTile {
-
-        public static final int IMAGE = 1;
-        public static final int CAMERA = 2;
-        public static final int GALLERY = 3;
-        private final Uri imageUri;
-        private final
-        @TileType
-        int tileType;
-
-        private PickerTile(@SpecialTileType int tileType) {
-            this(null, tileType);
-        }
-
-        private PickerTile(@Nullable Uri imageUri, @TileType int tileType) {
-            this.imageUri = imageUri;
-            this.tileType = tileType;
-        }
-
-        PickerTile(@NonNull Uri imageUri) {
-            this(imageUri, IMAGE);
-        }
-
-        @Nullable
-        public Uri getImageUri() {
-            return imageUri;
-        }
-
-        @TileType
-        public int getTileType() {
-            return tileType;
-        }
-
-        @Override
-        public String toString() {
-            if (isImageTile()) {
-                return "ImageTile: " + imageUri;
-            } else if (isCameraTile()) {
-                return "CameraTile";
-            } else if (isGalleryTile()) {
-                return "PickerTile";
-            } else {
-                return "Invalid item";
-            }
-        }
-
-        private boolean isImageTile() {
-            return tileType == IMAGE;
-        }
-
-        private boolean isCameraTile() {
-            return tileType == CAMERA;
-        }
-
-        private boolean isGalleryTile() {
-            return tileType == GALLERY;
-        }
-
-        @IntDef({IMAGE, CAMERA, GALLERY})
-        @Retention(RetentionPolicy.SOURCE)
-        private @interface TileType {
-        }
-
-        @IntDef({CAMERA, GALLERY})
-        @Retention(RetentionPolicy.SOURCE)
-        private @interface SpecialTileType {
-        }
-    }
 
     class GalleryViewHolder extends RecyclerView.ViewHolder {
 

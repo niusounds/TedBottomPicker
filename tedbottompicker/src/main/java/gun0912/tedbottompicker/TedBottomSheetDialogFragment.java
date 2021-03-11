@@ -1,70 +1,50 @@
 package gun0912.tedbottompicker;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
-import androidx.annotation.DimenRes;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import gun0912.tedbottompicker.adapter.GalleryAdapter;
-import gun0912.tedbottompicker.util.RealPathUtil;
 
 public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
-    private static final String EXTRA_CAMERA_IMAGE_URI = "camera_image_uri";
-    private static final String EXTRA_CAMERA_SELECTED_IMAGE_URI = "camera_selected_image_uri";
-    private static final int REQUEST_CODE_CAMERA = 1;
-    private static final int REQUEST_CODE_GALLERY = 2;
     public BaseBuilder builder;
     private GalleryAdapter imageGalleryAdapter;
     private View view_title_container;
@@ -75,9 +55,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     private LinearLayout selected_photos_container;
 
     private TextView selected_photos_empty;
-    private List<Uri> selectedUriList;
-    private List<Uri> tempUriList;
-    private Uri cameraImageUri;
+    private List<Content> selectedUriList;
+    private List<Content> tempUriList;
     private RecyclerView rc_gallery;
     private BottomSheetBehavior.BottomSheetCallback mBottomSheetBehaviorCallback = new BottomSheetBehavior.BottomSheetCallback() {
 
@@ -109,19 +88,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     private void setupSavedInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            cameraImageUri = builder.selectedUri;
             tempUriList = builder.selectedUriList;
-        } else {
-            cameraImageUri = savedInstanceState.getParcelable(EXTRA_CAMERA_IMAGE_URI);
-            tempUriList = savedInstanceState.getParcelableArrayList(EXTRA_CAMERA_SELECTED_IMAGE_URI);
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(EXTRA_CAMERA_IMAGE_URI, cameraImageUri);
-        outState.putParcelableArrayList(EXTRA_CAMERA_SELECTED_IMAGE_URI, new ArrayList<>(selectedUriList));
-        super.onSaveInstanceState(outState);
     }
 
     public void show(FragmentManager fragmentManager) {
@@ -137,7 +105,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         View contentView = View.inflate(getContext(), R.layout.tedbottompicker_content_view, null);
         dialog.setContentView(contentView);
         CoordinatorLayout.LayoutParams layoutParams =
-                (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
+            (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
         if (behavior instanceof BottomSheetBehavior) {
             ((BottomSheetBehavior) behavior).addBottomSheetCallback(mBottomSheetBehaviorCallback);
@@ -163,10 +131,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         selectedUriList = new ArrayList<>();
 
 
-        if (builder.onImageSelectedListener != null && cameraImageUri != null) {
-            addUri(cameraImageUri);
-        } else if (builder.onMultiImageSelectedListener != null && tempUriList != null) {
-            for (Uri uri : tempUriList) {
+        if (builder.onMultiImageSelectedListener != null && tempUriList != null) {
+            for (Content uri : tempUriList) {
                 addUri(uri);
             }
         }
@@ -258,54 +224,34 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     private void updateAdapter() {
 
-        imageGalleryAdapter = new GalleryAdapter(
-                getActivity()
-                , builder);
+        imageGalleryAdapter = new GalleryAdapter(getActivity(), builder);
         rc_gallery.setAdapter(imageGalleryAdapter);
         imageGalleryAdapter.setOnItemClickListener(new GalleryAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
 
-                GalleryAdapter.PickerTile pickerTile = imageGalleryAdapter.getItem(position);
-
-                switch (pickerTile.getTileType()) {
-                    case GalleryAdapter.PickerTile.CAMERA:
-                        startCameraIntent();
-                        break;
-                    case GalleryAdapter.PickerTile.GALLERY:
-                        startGalleryIntent();
-                        break;
-                    case GalleryAdapter.PickerTile.IMAGE:
-                        if (pickerTile.getImageUri() != null) {
-                            complete(pickerTile.getImageUri());
-                        }
-
-                        break;
-
-                    default:
-                        errorMessage();
-                }
-
+                Content pickerTile = imageGalleryAdapter.getItem(position);
+                complete(pickerTile);
             }
         });
     }
 
-    private void complete(final Uri uri) {
+    private void complete(final Content content) {
         if (isMultiSelect()) {
-            if (selectedUriList.contains(uri)) {
-                removeImage(uri);
+            if (selectedUriList.contains(content)) {
+                removeImage(content);
             } else {
-                addUri(uri);
+                addUri(content);
             }
 
         } else {
-            builder.onImageSelectedListener.onImageSelected(uri);
+            builder.onImageSelectedListener.onImageSelected(content);
             dismissAllowingStateLoss();
         }
 
     }
 
-    private void addUri(final Uri uri) {
+    private void addUri(final Content content) {
         if (selectedUriList.size() == builder.selectMaxCount) {
             String message;
             if (builder.selectMaxCountErrorText != null) {
@@ -319,12 +265,12 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         }
 
 
-        selectedUriList.add(uri);
+        selectedUriList.add(content);
 
         final View rootView = LayoutInflater.from(getActivity()).inflate(R.layout.tedbottompicker_selected_item, null);
         ImageView thumbnail = rootView.findViewById(R.id.selected_photo);
         ImageView iv_close = rootView.findViewById(R.id.iv_close);
-        rootView.setTag(uri);
+        rootView.setTag(content);
 
         selected_photos_container.addView(rootView, 0);
 
@@ -334,15 +280,15 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         if (builder.imageProvider == null) {
             Glide.with(getActivity())
-                    .load(uri)
-                    .thumbnail(0.1f)
-                    .apply(new RequestOptions()
-                            .centerCrop()
-                            .placeholder(R.drawable.ic_gallery)
-                            .error(R.drawable.img_error))
-                    .into(thumbnail);
+                .load(content.getUri())
+                .thumbnail(0.1f)
+                .apply(new RequestOptions()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_gallery)
+                    .error(R.drawable.img_error))
+                .into(thumbnail);
         } else {
-            builder.imageProvider.onProvideImage(thumbnail, uri);
+            builder.imageProvider.onProvideImage(thumbnail, content.getUri());
         }
 
 
@@ -353,18 +299,18 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         iv_close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                removeImage(uri);
+                removeImage(content);
 
             }
         });
 
 
         updateSelectedView();
-        imageGalleryAdapter.setSelectedUriList(selectedUriList, uri);
+        imageGalleryAdapter.setSelectedUriList(selectedUriList, content);
 
     }
 
-    private void removeImage(Uri uri) {
+    private void removeImage(Content uri) {
 
         selectedUriList.remove(uri);
 
@@ -395,110 +341,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
     }
 
-    private void startCameraIntent() {
-        Intent cameraInent;
-        File mediaFile;
-
-        if (builder.mediaType == BaseBuilder.MediaType.IMAGE) {
-            cameraInent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            mediaFile = getImageFile();
-        } else {
-            cameraInent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            mediaFile = getVideoFile();
-        }
-
-        if (cameraInent.resolveActivity(getActivity().getPackageManager()) == null) {
-            errorMessage("This Application do not have Camera Application");
-            return;
-        }
-
-
-        Uri photoURI = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", mediaFile);
-
-        List<ResolveInfo> resolvedIntentActivities = getContext().getPackageManager().queryIntentActivities(cameraInent, PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolvedIntentInfo : resolvedIntentActivities) {
-            String packageName = resolvedIntentInfo.activityInfo.packageName;
-            getContext().grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-
-        cameraInent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-
-        startActivityForResult(cameraInent, REQUEST_CODE_CAMERA);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case REQUEST_CODE_CAMERA:
-                if (resultCode == Activity.RESULT_OK) {
-                    onActivityResultCamera(cameraImageUri);
-                }
-            case REQUEST_CODE_GALLERY:
-                if (resultCode == Activity.RESULT_OK) {
-                    onActivityResultGallery(data);
-                }
-        }
-    }
-
-    private File getImageFile() {
-        // Create an image file name
-        File imageFile = null;
-        try {
-            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
-            String imageFileName = "JPEG_" + timeStamp + "_";
-            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-            if (!storageDir.exists())
-                storageDir.mkdirs();
-
-            imageFile = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".jpg",         /* suffix */
-                    storageDir      /* directory */
-            );
-
-
-            // Save a file: path for use with ACTION_VIEW intents
-            cameraImageUri = Uri.fromFile(imageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            errorMessage("Could not create imageFile for camera");
-        }
-
-
-        return imageFile;
-    }
-
-    private File getVideoFile() {
-        // Create an image file name
-        File videoFile = null;
-        try {
-            String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
-            String imageFileName = "VIDEO_" + timeStamp + "_";
-            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
-
-            if (!storageDir.exists())
-                storageDir.mkdirs();
-
-            videoFile = File.createTempFile(
-                    imageFileName,  /* prefix */
-                    ".mp4",         /* suffix */
-                    storageDir      /* directory */
-            );
-
-
-            // Save a file: path for use with ACTION_VIEW intents
-            cameraImageUri = Uri.fromFile(videoFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            errorMessage("Could not create imageFile for camera");
-        }
-
-
-        return videoFile;
-    }
-
     private void errorMessage(String message) {
         String errorMessage = message == null ? "Something wrong." : message;
 
@@ -507,26 +349,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         } else {
             builder.onErrorListener.onError(errorMessage);
         }
-    }
-
-    private void startGalleryIntent() {
-        Intent galleryIntent;
-        Uri uri;
-        if (builder.mediaType == BaseBuilder.MediaType.IMAGE) {
-            galleryIntent = new Intent(Intent.ACTION_PICK);
-            galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        } else {
-            galleryIntent = new Intent(Intent.ACTION_PICK);
-            galleryIntent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*");
-
-        }
-
-        if (galleryIntent.resolveActivity(getActivity().getPackageManager()) == null) {
-            errorMessage("This Application do not have Gallery Application");
-            return;
-        }
-
-        startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
     }
 
     private void errorMessage() {
@@ -559,56 +381,12 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
         return builder.onMultiImageSelectedListener != null;
     }
 
-    private void onActivityResultCamera(final Uri cameraImageUri) {
-
-        MediaScannerConnection.scanFile(getContext(), new String[]{cameraImageUri.getPath()}, new String[]{"image/jpeg"}, new MediaScannerConnection.MediaScannerConnectionClient() {
-            @Override
-            public void onMediaScannerConnected() {
-
-            }
-
-            @Override
-            public void onScanCompleted(String s, Uri uri) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateAdapter();
-                        complete(cameraImageUri);
-                    }
-                });
-
-            }
-        });
-    }
-
-
-    private void onActivityResultGallery(Intent data) {
-        Uri temp = data.getData();
-
-        if (temp == null) {
-            errorMessage();
-        }
-
-        String realPath = RealPathUtil.getRealPath(getActivity(), temp);
-
-        Uri selectedImageUri;
-        try {
-            selectedImageUri = Uri.fromFile(new File(realPath));
-        } catch (Exception ex) {
-            selectedImageUri = Uri.parse(realPath);
-        }
-
-        complete(selectedImageUri);
-
-    }
-
-
     public interface OnMultiImageSelectedListener {
-        void onImagesSelected(List<Uri> uriList);
+        void onImagesSelected(List<Content> uriList);
     }
 
     public interface OnImageSelectedListener {
-        void onImageSelected(Uri uri);
+        void onImageSelected(Content uri);
     }
 
     public interface OnErrorListener {
@@ -622,16 +400,10 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     public abstract static class BaseBuilder<T extends BaseBuilder> {
 
         public int previewMaxCount = 25;
-        public Drawable cameraTileDrawable;
-        public Drawable galleryTileDrawable;
         public Drawable selectedForegroundDrawable;
         public ImageProvider imageProvider;
-        public boolean showCamera = true;
-        public boolean showGallery = true;
         public int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
         public int galleryTileBackgroundResId = R.color.tedbottompicker_gallery;
-        @MediaType
-        public int mediaType = MediaType.IMAGE;
         protected FragmentActivity fragmentActivity;
         OnImageSelectedListener onImageSelectedListener;
         OnMultiImageSelectedListener onMultiImageSelectedListener;
@@ -659,20 +431,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
             this.fragmentActivity = fragmentActivity;
 
-            setCameraTile(R.drawable.ic_camera);
-            setGalleryTile(R.drawable.ic_gallery);
             setSpacingResId(R.dimen.tedbottompicker_grid_layout_margin);
             setExtraBottomPaddingId(R.dimen.tedbottompicker_grid_padding_bottom);
-        }
-
-        public T setCameraTile(@DrawableRes int cameraTileResId) {
-            setCameraTile(ContextCompat.getDrawable(fragmentActivity, cameraTileResId));
-            return (T) this;
-        }
-
-        public BaseBuilder<T> setGalleryTile(@DrawableRes int galleryTileResId) {
-            setGalleryTile(ContextCompat.getDrawable(fragmentActivity, galleryTileResId));
-            return this;
         }
 
         public T setSpacingResId(@DimenRes int dimenResId) {
@@ -682,16 +442,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T setExtraBottomPaddingId(@DimenRes int dimenResId) {
             this.extraBottomPadding = fragmentActivity.getResources().getDimensionPixelSize(dimenResId);
-            return (T) this;
-        }
-
-        public T setCameraTile(Drawable cameraTileDrawable) {
-            this.cameraTileDrawable = cameraTileDrawable;
-            return (T) this;
-        }
-
-        public T setGalleryTile(Drawable galleryTileDrawable) {
-            this.galleryTileDrawable = galleryTileDrawable;
             return (T) this;
         }
 
@@ -742,16 +492,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T setOnErrorListener(OnErrorListener onErrorListener) {
             this.onErrorListener = onErrorListener;
-            return (T) this;
-        }
-
-        public T showCameraTile(boolean showCamera) {
-            this.showCamera = showCamera;
-            return (T) this;
-        }
-
-        public T showGalleryTile(boolean showGallery) {
-            this.showGallery = showGallery;
             return (T) this;
         }
 
@@ -850,18 +590,8 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             return (T) this;
         }
 
-        public T setSelectedUriList(List<Uri> selectedUriList) {
-            this.selectedUriList = selectedUriList;
-            return (T) this;
-        }
-
         public T setSelectedUri(Uri selectedUri) {
             this.selectedUri = selectedUri;
-            return (T) this;
-        }
-
-        public T showVideoMedia() {
-            this.mediaType = MediaType.VIDEO;
             return (T) this;
         }
 
@@ -877,7 +607,7 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public TedBottomSheetDialogFragment create() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                    && ContextCompat.checkSelfPermission(fragmentActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && ContextCompat.checkSelfPermission(fragmentActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 throw new RuntimeException("Missing required WRITE_EXTERNAL_STORAGE permission. Did you remember to request it first?");
             }
 
@@ -888,13 +618,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
             TedBottomSheetDialogFragment customBottomSheetDialogFragment = new TedBottomSheetDialogFragment();
             customBottomSheetDialogFragment.builder = (T) this;
             return customBottomSheetDialogFragment;
-        }
-
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef({MediaType.IMAGE, MediaType.VIDEO})
-        public @interface MediaType {
-            int IMAGE = 1;
-            int VIDEO = 2;
         }
 
 

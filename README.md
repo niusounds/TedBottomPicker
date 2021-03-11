@@ -6,14 +6,6 @@ This is modified from original TedBottomPicker for my app requirements. Below sc
 In Google's Material Design, Google introduce **Bottom sheets**.([Components – Bottom sheets](https://material.google.com/components/bottom-sheets.html))<br/>
 **Bottom sheets** slide up from the bottom of the screen to reveal more content.
 
-If you want pick image from gallery or take picture, this library can help easily.<br/>
-**TedBottomPicker** provide 3 options: <br/>
-
-1. Take a picture by camera(using `MediaStore.ACTION_IMAGE_CAPTURE` intent)
-2. Get image from gallery(using `Intent.ACTION_PICK` intent)
-3. Get image from recent image(using `MediaStore.Images.Media.EXTERNAL_CONTENT_URI` cursor)
-
-
 **TedBottomPicker** is simple image picker using bottom sheet.
 
 <br/><br/>
@@ -143,16 +135,9 @@ You can customize something ...<br />
 
 #### Common
 
-* `showVideoMedia()` : Not only load image, but also load video
 * `setPreviewMaxCount(Int) (default: 25)`
 * `setPeekHeight(Int)`
 * `setPeekHeightResId(R.dimen.xxx)`
-* `showCameraTile(Boolean) (default: true)`
-* `setCameraTile(R.drawable.xxx or Drawable)`
-* `setCameraTileBackgroundResId(R.color.xxx)`
-* `setGalleryTile(R.drawable.xxx or Drawable)`
-* `showGalleryTile(Boolean) (default: true)`
-* `setGalleryTileBackgroundResId(R.color.xxx)`
 * `setSpacing(Int)`
 * `setSpacingResId(R.dimen.xxx)`
 * `setOnErrorListener(OnErrorListener)`
