@@ -58,23 +58,16 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
         Cursor cursor = null;
         try {
-            String[] columns;
-            String orderBy;
-            Uri uri;
-            if (builder.mediaType == TedBottomSheetDialogFragment.BaseBuilder.MediaType.IMAGE) {
-                uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                columns = new String[]{MediaStore.Images.Media.DATA};
-                orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            } else {
-                uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                columns = new String[]{MediaStore.Video.VideoColumns.DATA};
-                orderBy = MediaStore.Video.VideoColumns.DATE_ADDED + " DESC";
-            }
+            String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                + " OR "
+                + MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+            String[] columns = {
+                MediaStore.Files.FileColumns.DATA
+            };
+            String orderBy = MediaStore.Files.FileColumns.DATE_ADDED + " DESC";
+            Uri uri = MediaStore.Files.getContentUri("external");
 
-
-
-
-            cursor = context.getApplicationContext().getContentResolver().query(uri, columns, null, null, orderBy);
+            cursor = context.getApplicationContext().getContentResolver().query(uri, columns, selection, null, orderBy);
             //imageCursor = sContext.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
 
 
@@ -83,12 +76,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                 int count = 0;
                 while (cursor.moveToNext() && count < builder.previewMaxCount) {
 
-                    String dataIndex;
-                    if (builder.mediaType == TedBottomSheetDialogFragment.BaseBuilder.MediaType.IMAGE) {
-                        dataIndex = MediaStore.Images.Media.DATA;
-                    }else{
-                        dataIndex = MediaStore.Video.VideoColumns.DATA;
-                    }
+                    String dataIndex = MediaStore.Files.FileColumns.DATA;
                     String imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex));
                     File imageFile = new File(imageLocation);
                     pickerTiles.add(new PickerTile(Uri.fromFile(imageFile)));
