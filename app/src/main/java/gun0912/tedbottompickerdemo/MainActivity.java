@@ -63,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
                     TedBottomPicker.with(MainActivity.this)
                             //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
                             .setSelectedUri(selectedUri)
-                            .showGalleryTile(false)
-                            .showCameraTile(false)
                             .show(uri -> {
                                 Log.d("ted", "uri: " + uri);
                                 Log.d("ted", "uri.getPath(): " + uri.getPath());
@@ -106,8 +104,6 @@ public class MainActivity extends AppCompatActivity {
                             //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
                             .setTitle("Pick photos")
                             .setCompleteButtonText("Done")
-                            .showGalleryTile(false)
-                            .showCameraTile(false)
                             .setEmptySelectionText("No Select")
                             .setSelectedUriList(selectedUriList)
                             .showMultiImage(uriList -> {

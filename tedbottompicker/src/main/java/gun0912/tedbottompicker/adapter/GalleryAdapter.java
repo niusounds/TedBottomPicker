@@ -49,14 +49,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
         pickerTiles = new ArrayList<>();
         selectedUriList = new ArrayList<>();
 
-        if (builder.showCamera) {
-            pickerTiles.add(new PickerTile(PickerTile.CAMERA));
-        }
-
-        if (builder.showGallery) {
-            pickerTiles.add(new PickerTile(PickerTile.GALLERY));
-        }
-
         Cursor cursor = null;
         try {
             String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -138,11 +130,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
         if (pickerTile.isCameraTile()) {
             holder.iv_thumbnail.setBackgroundResource(builder.cameraTileBackgroundResId);
-            holder.iv_thumbnail.setImageDrawable(builder.cameraTileDrawable);
         } else if (pickerTile.isGalleryTile()) {
             holder.iv_thumbnail.setBackgroundResource(builder.galleryTileBackgroundResId);
-            holder.iv_thumbnail.setImageDrawable(builder.galleryTileDrawable);
-
         } else {
             Uri uri = pickerTile.getImageUri();
             if (builder.imageProvider == null) {
