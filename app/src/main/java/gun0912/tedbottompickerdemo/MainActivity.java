@@ -3,7 +3,6 @@ package gun0912.tedbottompickerdemo;
 import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,47 +45,7 @@ public class MainActivity extends AppCompatActivity {
         iv_image = findViewById(R.id.iv_image);
         mSelectedImagesContainer = findViewById(R.id.selected_photos_container);
         requestManager = Glide.with(this);
-        setSingleShowButton();
         setMultiShowButton();
-    }
-
-    private void setSingleShowButton() {
-
-        Button btnSingleShow = findViewById(R.id.btn_single_show);
-        btnSingleShow.setOnClickListener(view -> {
-            PermissionListener permissionlistener = new PermissionListener() {
-                @Override
-                public void onPermissionGranted() {
-
-                    TedBottomPicker.with(MainActivity.this)
-                        //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
-                        .setSelectedUri(selectedUri)
-                        .show(uri -> {
-                            Log.d("ted", "uri: " + uri);
-                            Log.d("ted", "uri.getPath(): " + uri.getUri());
-                            selectedUri = uri.getUri();
-
-                            iv_image.setVisibility(View.VISIBLE);
-                            mSelectedImagesContainer.setVisibility(View.GONE);
-
-                            requestManager
-                                .load(selectedUri)
-                                .into(iv_image);
-                        });
-
-
-                }
-
-                @Override
-                public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                    Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
-                }
-
-
-            };
-
-            checkPermission(permissionlistener);
-        });
     }
 
     private void setMultiShowButton() {
