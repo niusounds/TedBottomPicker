@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                         .setTitle("Pick photos")
                         .setCompleteButtonText("Done")
                         .setEmptySelectionText("No Select")
+                        .setSelectMaxCount(4)
                         .showMultiImage(contentList -> {
                             selectedUriList = contentList;
                             final List<Uri> uriList = new ArrayList<>();
