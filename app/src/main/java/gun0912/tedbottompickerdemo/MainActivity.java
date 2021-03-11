@@ -25,15 +25,12 @@ import java.util.List;
 
 import gun0912.tedbottompicker.Content;
 import gun0912.tedbottompicker.TedBottomPicker;
-import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity {
 
     private ImageView iv_image;
     private List<Content> selectedUriList;
     private Uri selectedUri;
-    private Disposable singleImageDisposable;
-    private Disposable multiImageDisposable;
     private ViewGroup mSelectedImagesContainer;
     private RequestManager requestManager;
 
@@ -125,16 +122,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (singleImageDisposable != null && !singleImageDisposable.isDisposed()) {
-            singleImageDisposable.dispose();
-        }
-        if (multiImageDisposable != null && !multiImageDisposable.isDisposed()) {
-            multiImageDisposable.dispose();
-        }
-        super.onDestroy();
     }
 }
