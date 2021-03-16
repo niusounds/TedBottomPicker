@@ -135,7 +135,6 @@ You can customize something ...<br />
 
 #### Common
 
-* `setPreviewMaxCount(Int) (default: 25)`
 * `setPeekHeight(Int)`
 * `setPeekHeightResId(R.dimen.xxx)`
 * `setSpacing(Int)`

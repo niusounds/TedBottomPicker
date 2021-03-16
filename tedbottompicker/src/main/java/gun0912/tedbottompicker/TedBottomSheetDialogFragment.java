@@ -404,7 +404,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
     public abstract static class BaseBuilder<T extends BaseBuilder> {
 
         public Set<Type> filterType = new HashSet<>(Arrays.asList(Type.Image, Type.Video));
-        public int previewMaxCount = 25;
         public Drawable selectedForegroundDrawable;
         public ImageProvider imageProvider;
         public int cameraTileBackgroundResId = R.color.tedbottompicker_camera;
@@ -472,11 +471,6 @@ public class TedBottomSheetDialogFragment extends BottomSheetDialogFragment {
 
         public T setSelectedForeground(Drawable selectedForegroundDrawable) {
             this.selectedForegroundDrawable = selectedForegroundDrawable;
-            return (T) this;
-        }
-
-        public T setPreviewMaxCount(int previewMaxCount) {
-            this.previewMaxCount = previewMaxCount;
             return (T) this;
         }
 

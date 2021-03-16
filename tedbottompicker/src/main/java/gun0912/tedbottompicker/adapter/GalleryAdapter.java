@@ -71,8 +71,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
 
             if (cursor != null) {
 
-                int count = 0;
-                while (cursor.moveToNext() && count < builder.previewMaxCount) {
+                while (cursor.moveToNext()) {
 
                     String dataIndex = MediaStore.Files.FileColumns.DATA;
                     String imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex));
@@ -80,7 +79,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryV
                     File imageFile = new File(imageLocation);
                     final Type type = mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE ? Type.Image : Type.Video;
                     pickerTiles.add(new Content(Uri.fromFile(imageFile), type));
-                    count++;
 
                 }
 
