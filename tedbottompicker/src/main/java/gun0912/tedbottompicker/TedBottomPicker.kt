@@ -22,7 +22,6 @@ import androidx.annotation.StringRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -32,13 +31,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import gun0912.tedbottompicker.adapter.GalleryAdapter
 import gun0912.tedbottompicker.databinding.TedbottompickerContentViewBinding
 import gun0912.tedbottompicker.databinding.TedbottompickerSelectedItemBinding
-import java.util.ArrayList
 
 class TedBottomPicker : BottomSheetDialogFragment() {
     private lateinit var binding: TedbottompickerContentViewBinding
     private lateinit var builder: Builder
     private lateinit var imageGalleryAdapter: GalleryAdapter
-    private lateinit var selectedUriList: MutableList<Content>
+    private lateinit var selectedContentList: MutableList<Content>
 
     private val mBottomSheetBehaviorCallback: BottomSheetCallback = object : BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -55,12 +53,6 @@ class TedBottomPicker : BottomSheetDialogFragment() {
                     -(bottomSheet.top - behavior.expandedOffset).toFloat()
             }
         }
-    }
-
-    fun show(fragmentManager: FragmentManager) {
-        val ft = fragmentManager.beginTransaction()
-        ft.add(this, tag)
-        ft.commitAllowingStateLoss()
     }
 
     override fun setupDialog(dialog: Dialog, style: Int) {
@@ -84,7 +76,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         setTitle()
         setRecyclerView()
         setSelectionView()
-        selectedUriList = ArrayList()
+        selectedContentList = mutableListOf()
         setDoneButton()
         checkMultiMode()
     }
@@ -109,7 +101,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
     }
 
     private fun onMultiSelectComplete() {
-        if (selectedUriList.size < builder.selectMinCount) {
+        if (selectedContentList.size < builder.selectMinCount) {
             val message: String? = if (builder.selectMinCountErrorText != null) {
                 builder.selectMinCountErrorText
             } else {
@@ -121,7 +113,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
             Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
             return
         }
-        builder.onMultiImageSelectedListener?.onImagesSelected(selectedUriList)
+        builder.onMultiImageSelectedListener?.onImagesSelected(selectedContentList)
         dismissAllowingStateLoss()
     }
 
@@ -159,10 +151,10 @@ class TedBottomPicker : BottomSheetDialogFragment() {
 
     private fun complete(content: Content) {
         if (isMultiSelect) {
-            if (selectedUriList.contains(content)) {
-                removeImage(content)
+            if (selectedContentList.contains(content)) {
+                removeSelected(content)
             } else {
-                addUri(content)
+                addSelected(content)
             }
         } else {
             builder.onImageSelectedListener?.onImageSelected(content)
@@ -170,8 +162,8 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         }
     }
 
-    private fun addUri(content: Content) {
-        if (selectedUriList.size == builder.selectMaxCount) {
+    private fun addSelected(content: Content) {
+        if (selectedContentList.size == builder.selectMaxCount) {
             val message: String = builder.selectMaxCountErrorText ?: String.format(
                 resources.getString(R.string.select_max_count),
                 builder.selectMaxCount
@@ -182,7 +174,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
 
         when (content.type) {
             Type.Image -> {
-                if (selectedUriList.filter { it.type == Type.Image }.size == builder.selectMaxImageCount) {
+                if (selectedContentList.filter { it.type == Type.Image }.size == builder.selectMaxImageCount) {
                     val message: String = builder.selectMaxImageCountErrorText ?: String.format(
                         resources.getString(R.string.select_max_images_count),
                         builder.selectMaxImageCount
@@ -192,7 +184,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
                 }
             }
             Type.Video -> {
-                if (selectedUriList.filter { it.type == Type.Video }.size == builder.selectMaxVideoCount) {
+                if (selectedContentList.filter { it.type == Type.Video }.size == builder.selectMaxVideoCount) {
                     val message: String = builder.selectMaxVideoCountErrorText ?: String.format(
                         resources.getString(R.string.select_max_videos_count),
                         builder.selectMaxVideoCount
@@ -203,7 +195,7 @@ class TedBottomPicker : BottomSheetDialogFragment() {
             }
         }
 
-        selectedUriList.add(content)
+        selectedContentList.add(content)
         val itemBinding =
             TedbottompickerSelectedItemBinding.inflate(LayoutInflater.from(requireContext()))
         itemBinding.root.tag = content
@@ -228,26 +220,26 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         if (builder.deSelectIconDrawable != null) {
             itemBinding.ivClose.setImageDrawable(builder.deSelectIconDrawable)
         }
-        itemBinding.ivClose.setOnClickListener { removeImage(content) }
+        itemBinding.ivClose.setOnClickListener { removeSelected(content) }
         updateSelectedView()
-        imageGalleryAdapter.setSelectedUriList(selectedUriList, content)
+        imageGalleryAdapter.setSelectedUriList(selectedContentList, content)
     }
 
-    private fun removeImage(uri: Content) {
-        selectedUriList.remove(uri)
+    private fun removeSelected(content: Content) {
+        selectedContentList.remove(content)
         for (i in 0 until binding.selectedPhotosContainer.childCount) {
             val childView = binding.selectedPhotosContainer.getChildAt(i)
-            if (childView.tag == uri) {
+            if (childView.tag == content) {
                 binding.selectedPhotosContainer.removeViewAt(i)
                 break
             }
         }
         updateSelectedView()
-        imageGalleryAdapter.setSelectedUriList(selectedUriList, uri)
+        imageGalleryAdapter.setSelectedUriList(selectedContentList, content)
     }
 
     private fun updateSelectedView() {
-        if (selectedUriList.size == 0) {
+        if (selectedContentList.size == 0) {
             binding.selectedPhotosEmpty.visibility = View.VISIBLE
             binding.selectedPhotosContainer.visibility = View.GONE
         } else {
@@ -286,19 +278,19 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         private get() = builder.onMultiImageSelectedListener != null
 
     interface OnMultiImageSelectedListener {
-        fun onImagesSelected(uriList: List<Content>?)
+        fun onImagesSelected(contents: List<Content>)
     }
 
     interface OnImageSelectedListener {
-        fun onImageSelected(uri: Content?)
+        fun onImageSelected(content: Content)
     }
 
     interface OnErrorListener {
-        fun onError(message: String?)
+        fun onError(message: String)
     }
 
     interface ImageProvider {
-        fun onProvideImage(imageView: ImageView?, imageUri: Uri?)
+        fun onProvideImage(imageView: ImageView, imageUri: Uri)
     }
 
     data class Builder @JvmOverloads constructor(
@@ -313,8 +305,6 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         val onErrorListener: OnErrorListener? = null,
         val title: String? = null,
         val showTitle: Boolean = true,
-        val selectedUriList: List<Uri>? = null,
-        private val selectedUri: Uri? = null,
         val deSelectIconDrawable: Drawable? = null,
         val spacing: Int = fragmentActivity.resources.getDimensionPixelSize(R.dimen.tedbottompicker_grid_layout_margin),
         val includeEdgeSpacing: Boolean = false,
@@ -492,10 +482,6 @@ class TedBottomPicker : BottomSheetDialogFragment() {
             return copy(imageProvider = imageProvider)
         }
 
-        fun setSelectedUri(selectedUri: Uri?): Builder {
-            return copy(selectedUri = selectedUri)
-        }
-
         fun setButtonColor(@ColorInt color: Int): Builder {
             return copy(buttonColor = color)
         }
@@ -524,13 +510,13 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         fun show(onImageSelectedListener: OnImageSelectedListener?) {
             copy(onImageSelectedListener = onImageSelectedListener)
                 .create()
-                .show(fragmentActivity.supportFragmentManager)
+                .show(fragmentActivity.supportFragmentManager, null)
         }
 
         fun showMultiImage(onMultiImageSelectedListener: OnMultiImageSelectedListener?) {
             copy(onMultiImageSelectedListener = onMultiImageSelectedListener)
                 .create()
-                .show(fragmentActivity.supportFragmentManager)
+                .show(fragmentActivity.supportFragmentManager, null)
         }
     }
 

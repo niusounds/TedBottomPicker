@@ -61,11 +61,8 @@ class GalleryAdapter(
 
         val isSelected: Boolean = selected.contains(content)
 
-        val foregroundDrawable: Drawable? = if (builder.selectedForegroundDrawable != null) {
-            builder.selectedForegroundDrawable
-        } else {
-            ContextCompat.getDrawable(context, R.drawable.gallery_photo_selected)
-        }
+        val foregroundDrawable: Drawable? = builder.selectedForegroundDrawable
+            ?: ContextCompat.getDrawable(context, R.drawable.gallery_photo_selected)
 
         holder.root.foreground = if (isSelected) foregroundDrawable else null
 
