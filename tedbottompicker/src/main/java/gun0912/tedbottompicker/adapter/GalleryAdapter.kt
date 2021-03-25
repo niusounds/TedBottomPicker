@@ -49,19 +49,15 @@ class GalleryAdapter(
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {
         val item = getItem(position)
 
-        if (builder.imageProvider == null) {
-            Glide.with(context)
-                .load(item.content.uri)
-                .thumbnail(0.1f)
-                .apply(
-                    RequestOptions().centerCrop()
-                        .placeholder(R.drawable.ic_gallery)
-                        .error(R.drawable.img_error)
-                )
-                .into(holder.thumbnail)
-        } else {
-            builder.imageProvider.onProvideImage(holder.thumbnail, item.content.uri)
-        }
+        Glide.with(context)
+            .load(item.content.uri)
+            .thumbnail(0.1f)
+            .apply(
+                RequestOptions().centerCrop()
+                    .placeholder(R.drawable.ic_gallery)
+                    .error(R.drawable.img_error)
+            )
+            .into(holder.thumbnail)
 
         val isSelected: Boolean = item.selected
 

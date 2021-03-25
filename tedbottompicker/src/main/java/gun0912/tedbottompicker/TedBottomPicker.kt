@@ -13,7 +13,6 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -245,21 +244,16 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         binding.selectedPhotosContainer.addView(itemBinding.root, 0)
         val px = resources.getDimension(R.dimen.tedbottompicker_selected_image_height).toInt()
         itemBinding.selectedPhoto.layoutParams = FrameLayout.LayoutParams(px, px)
-        val imageProvider = builder.imageProvider
-        if (imageProvider == null) {
-            Glide.with(requireActivity())
-                .load(content.uri)
-                .thumbnail(0.1f)
-                .apply(
-                    RequestOptions()
-                        .centerCrop()
-                        .placeholder(R.drawable.ic_gallery)
-                        .error(R.drawable.img_error)
-                )
-                .into(itemBinding.selectedPhoto)
-        } else {
-            imageProvider.onProvideImage(itemBinding.selectedPhoto, content.uri)
-        }
+        Glide.with(requireActivity())
+            .load(content.uri)
+            .thumbnail(0.1f)
+            .apply(
+                RequestOptions()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_gallery)
+                    .error(R.drawable.img_error)
+            )
+            .into(itemBinding.selectedPhoto)
         if (builder.deSelectIconDrawable != null) {
             itemBinding.ivClose.setImageDrawable(builder.deSelectIconDrawable)
         }
@@ -332,15 +326,10 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         fun onError(message: String)
     }
 
-    interface ImageProvider {
-        fun onProvideImage(imageView: ImageView, imageUri: Uri)
-    }
-
     data class Builder @JvmOverloads constructor(
         private val fragmentActivity: FragmentActivity,
         val filterType: Set<Type> = setOf(Type.Image, Type.Video),
         val selectedForegroundDrawable: Drawable? = null,
-        val imageProvider: ImageProvider? = null,
         val cameraTileBackgroundResId: Int = R.color.tedbottompicker_camera,
         val galleryTileBackgroundResId: Int = R.color.tedbottompicker_gallery,
         val onImageSelectedListener: OnImageSelectedListener? = null,
@@ -519,10 +508,6 @@ class TedBottomPicker : BottomSheetDialogFragment() {
 
         fun setTitleBackgroundResId(@ColorRes colorResId: Int): Builder {
             return copy(titleBackgroundResId = colorResId)
-        }
-
-        fun setImageProvider(imageProvider: ImageProvider?): Builder {
-            return copy(imageProvider = imageProvider)
         }
 
         fun setButtonColor(@ColorInt color: Int): Builder {
