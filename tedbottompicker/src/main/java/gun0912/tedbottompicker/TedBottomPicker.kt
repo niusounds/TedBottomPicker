@@ -285,16 +285,6 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         }
     }
 
-    private fun errorMessage(message: String? = null) {
-        val errorMessage = message ?: "Something wrong."
-        val onErrorListener = builder.onErrorListener
-        if (onErrorListener == null) {
-            Toast.makeText(activity, errorMessage, Toast.LENGTH_SHORT).show()
-        } else {
-            onErrorListener.onError(errorMessage)
-        }
-    }
-
     private fun setTitle() {
         if (!builder.showTitle) {
             binding.tvTitle.visibility = View.GONE
