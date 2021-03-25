@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -14,6 +15,7 @@ import gun0912.tedbottompicker.Content
 import gun0912.tedbottompicker.R
 import gun0912.tedbottompicker.TedBottomPicker
 import gun0912.tedbottompicker.Type
+import gun0912.tedbottompicker.databinding.TedbottompickerGridItemBinding
 import java.io.File
 
 /**
@@ -37,8 +39,7 @@ class GalleryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder {
-        val view = View.inflate(context, R.layout.tedbottompicker_grid_item, null)
-        return GalleryViewHolder(view)
+        return GalleryViewHolder(TedbottompickerGridItemBinding.inflate(LayoutInflater.from(context)))
     }
 
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {

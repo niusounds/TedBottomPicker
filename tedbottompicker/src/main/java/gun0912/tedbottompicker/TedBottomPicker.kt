@@ -31,6 +31,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCa
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import gun0912.tedbottompicker.adapter.GalleryAdapter
 import gun0912.tedbottompicker.databinding.TedbottompickerContentViewBinding
+import gun0912.tedbottompicker.databinding.TedbottompickerSelectedItemBinding
 import java.util.ArrayList
 
 class TedBottomPicker : BottomSheetDialogFragment() {
@@ -203,14 +204,12 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         }
 
         selectedUriList.add(content)
-        val rootView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.tedbottompicker_selected_item, null)
-        val thumbnail = rootView.findViewById<ImageView>(R.id.selected_photo)
-        val iv_close = rootView.findViewById<ImageView>(R.id.iv_close)
-        rootView.tag = content
-        binding.selectedPhotosContainer.addView(rootView, 0)
+        val itemBinding =
+            TedbottompickerSelectedItemBinding.inflate(LayoutInflater.from(requireContext()))
+        itemBinding.root.tag = content
+        binding.selectedPhotosContainer.addView(itemBinding.root, 0)
         val px = resources.getDimension(R.dimen.tedbottompicker_selected_image_height).toInt()
-        thumbnail.layoutParams = FrameLayout.LayoutParams(px, px)
+        itemBinding.selectedPhoto.layoutParams = FrameLayout.LayoutParams(px, px)
         val imageProvider = builder.imageProvider
         if (imageProvider == null) {
             Glide.with(requireActivity())
@@ -222,14 +221,14 @@ class TedBottomPicker : BottomSheetDialogFragment() {
                         .placeholder(R.drawable.ic_gallery)
                         .error(R.drawable.img_error)
                 )
-                .into(thumbnail)
+                .into(itemBinding.selectedPhoto)
         } else {
-            imageProvider.onProvideImage(thumbnail, content.uri)
+            imageProvider.onProvideImage(itemBinding.selectedPhoto, content.uri)
         }
         if (builder.deSelectIconDrawable != null) {
-            iv_close.setImageDrawable(builder.deSelectIconDrawable)
+            itemBinding.ivClose.setImageDrawable(builder.deSelectIconDrawable)
         }
-        iv_close.setOnClickListener { removeImage(content) }
+        itemBinding.ivClose.setOnClickListener { removeImage(content) }
         updateSelectedView()
         imageGalleryAdapter.setSelectedUriList(selectedUriList, content)
     }
