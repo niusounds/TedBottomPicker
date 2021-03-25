@@ -483,6 +483,30 @@ class TedBottomPicker : BottomSheetDialogFragment() {
             )
         }
 
+        fun setSelectMaxImageCountErrorText(selectMaxImageCountErrorText: String?): Builder {
+            return copy(selectMaxImageCountErrorText = selectMaxImageCountErrorText)
+        }
+
+        fun setSelectMaxImageCountErrorText(@StringRes selectMaxImageCountErrorResId: Int): Builder {
+            return copy(
+                selectMaxImageCountErrorText = fragmentActivity.resources.getString(
+                    selectMaxImageCountErrorResId
+                )
+            )
+        }
+
+        fun setSelectMaxVideoCountErrorText(selectMaxVideoCountErrorText: String?): Builder {
+            return copy(selectMaxVideoCountErrorText = selectMaxVideoCountErrorText)
+        }
+
+        fun setSelectMaxVideoCountErrorText(@StringRes selectMaxVideoCountErrorResId: Int): Builder {
+            return copy(
+                selectMaxVideoCountErrorText = fragmentActivity.resources.getString(
+                    selectMaxVideoCountErrorResId
+                )
+            )
+        }
+
         fun setSelectMinCountErrorText(selectMinCountErrorText: String?): Builder {
             return copy(selectMinCountErrorText = selectMinCountErrorText)
         }
