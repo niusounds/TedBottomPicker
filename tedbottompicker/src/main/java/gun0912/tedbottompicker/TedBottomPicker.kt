@@ -8,6 +8,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +32,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import gun0912.tedbottompicker.adapter.GalleryAdapter
 import gun0912.tedbottompicker.databinding.TedbottompickerContentViewBinding
 import gun0912.tedbottompicker.databinding.TedbottompickerSelectedItemBinding
+import java.io.File
 
 class TedBottomPicker : BottomSheetDialogFragment() {
     private lateinit var binding: TedbottompickerContentViewBinding
@@ -140,13 +142,54 @@ class TedBottomPicker : BottomSheetDialogFragment() {
 
     private fun updateAdapter() {
         imageGalleryAdapter = GalleryAdapter(requireContext(), builder)
+        initAdapter()
         binding.rcGallery.adapter = imageGalleryAdapter
         imageGalleryAdapter.setOnItemClickListener(object : GalleryAdapter.OnItemClickListener {
-            override fun onItemClick(view: View?, position: Int) {
-                val pickerTile = imageGalleryAdapter.getItem(position)
-                complete(pickerTile)
+            override fun onItemClick(content: Content) {
+                complete(content)
             }
         })
+    }
+
+    private fun initAdapter() {
+        try {
+            val selections = mutableListOf<String>()
+            if (builder.filterType.contains(Type.Image)) {
+                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE}"
+            }
+            if (builder.filterType.contains(Type.Video)) {
+                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO}"
+            }
+            val selection = selections.joinToString(" OR ")
+            val columns = arrayOf(
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.MEDIA_TYPE
+            )
+            val orderBy = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+            val uri = MediaStore.Files.getContentUri("external")
+            requireContext().applicationContext.contentResolver.query(
+                uri,
+                columns,
+                selection,
+                null,
+                orderBy
+            )?.use { cursor ->
+                val pickerTiles = mutableListOf<Content>()
+                while (cursor.moveToNext()) {
+                    val dataIndex = MediaStore.Files.FileColumns.DATA
+                    val imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex))
+                    val mediaType =
+                        cursor.getInt(cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE))
+                    val imageFile = File(imageLocation)
+                    val type =
+                        if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) Type.Image else Type.Video
+                    pickerTiles.add(Content(Uri.fromFile(imageFile), type))
+                }
+                imageGalleryAdapter.submitContentList(pickerTiles)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun complete(content: Content) {

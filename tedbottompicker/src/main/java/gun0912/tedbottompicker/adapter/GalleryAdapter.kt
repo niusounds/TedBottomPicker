@@ -2,21 +2,17 @@ package gun0912.tedbottompicker.adapter
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.provider.MediaStore
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import gun0912.tedbottompicker.Content
 import gun0912.tedbottompicker.R
 import gun0912.tedbottompicker.TedBottomPicker
-import gun0912.tedbottompicker.Type
 import gun0912.tedbottompicker.databinding.TedbottompickerGridItemBinding
-import java.io.File
 
 /**
  * Created by TedPark on 2016. 8. 30..
@@ -24,18 +20,26 @@ import java.io.File
 class GalleryAdapter(
     private val context: Context,
     private val builder: TedBottomPicker.Builder
-) :
-    RecyclerView.Adapter<GalleryViewHolder>() {
-    private val pickerTiles = mutableListOf<Content>()
+) : ListAdapter<GalleryAdapter.GridItem, GalleryViewHolder>(diffCallback) {
+    companion object {
+        private val diffCallback = object : DiffUtil.ItemCallback<GalleryAdapter.GridItem>() {
+            override fun areItemsTheSame(oldItem: GridItem, newItem: GridItem): Boolean =
+                oldItem.content.uri == newItem.content.uri
+
+            override fun areContentsTheSame(oldItem: GridItem, newItem: GridItem): Boolean =
+                oldItem == newItem
+        }
+    }
+
+    data class GridItem(val content: Content, val selected: Boolean, val disabled: Boolean)
+
     private var onItemClickListener: OnItemClickListener? = null
     private var selected: List<Content> = emptyList()
 
     fun setSelectedUriList(selected: List<Content>, content: Content) {
         this.selected = selected
-        val position = pickerTiles.indexOfFirst { content == it }
-        if (position >= 0) {
-            notifyItemChanged(position)
-        }
+        val newList = currentList.map { it.copy(selected = selected.contains(it.content)) }
+        super.submitList(newList)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder {
@@ -43,11 +47,11 @@ class GalleryAdapter(
     }
 
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {
-        val content = getItem(position)
+        val item = getItem(position)
 
         if (builder.imageProvider == null) {
             Glide.with(context)
-                .load(content.uri)
+                .load(item.content.uri)
                 .thumbnail(0.1f)
                 .apply(
                     RequestOptions().centerCrop()
@@ -56,78 +60,40 @@ class GalleryAdapter(
                 )
                 .into(holder.thumbnail)
         } else {
-            builder.imageProvider.onProvideImage(holder.thumbnail, content.uri)
+            builder.imageProvider.onProvideImage(holder.thumbnail, item.content.uri)
         }
 
-        val isSelected: Boolean = selected.contains(content)
+        val isSelected: Boolean = item.selected
 
         val foregroundDrawable: Drawable? = builder.selectedForegroundDrawable
             ?: ContextCompat.getDrawable(context, R.drawable.gallery_photo_selected)
 
         holder.root.foreground = if (isSelected) foregroundDrawable else null
 
-        if (onItemClickListener != null) {
+        onItemClickListener?.let { listener ->
             holder.itemView.setOnClickListener {
-                onItemClickListener!!.onItemClick(
-                    holder.itemView,
-                    holder.adapterPosition
-                )
+                listener.onItemClick(item.content)
             }
         }
-    }
-
-    fun getItem(position: Int): Content {
-        return pickerTiles[position]
-    }
-
-    override fun getItemCount(): Int {
-        return pickerTiles.size
     }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
         this.onItemClickListener = onItemClickListener
     }
 
-    interface OnItemClickListener {
-        fun onItemClick(view: View?, position: Int)
+    fun submitContentList(list: List<Content>, commitCallback: Runnable? = null) {
+        super.submitList(list.map { GridItem(it, false, false) }, commitCallback)
     }
 
-    init {
-        try {
-            val selections = mutableListOf<String>()
-            if (builder.filterType.contains(Type.Image)) {
-                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE}"
-            }
-            if (builder.filterType.contains(Type.Video)) {
-                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO}"
-            }
-            val selection = selections.joinToString(" OR ")
-            val columns = arrayOf(
-                MediaStore.Files.FileColumns.DATA,
-                MediaStore.Files.FileColumns.MEDIA_TYPE
-            )
-            val orderBy = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
-            val uri = MediaStore.Files.getContentUri("external")
-            context.applicationContext.contentResolver.query(
-                uri,
-                columns,
-                selection,
-                null,
-                orderBy
-            )?.use { cursor ->
-                while (cursor.moveToNext()) {
-                    val dataIndex = MediaStore.Files.FileColumns.DATA
-                    val imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex))
-                    val mediaType =
-                        cursor.getInt(cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE))
-                    val imageFile = File(imageLocation)
-                    val type =
-                        if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) Type.Image else Type.Video
-                    pickerTiles.add(Content(Uri.fromFile(imageFile), type))
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+    override fun submitList(list: MutableList<GridItem>?) {
+        error("use submitContentList")
+    }
+
+    override fun submitList(list: MutableList<GridItem>?, commitCallback: Runnable?) {
+        error("use submitContentList")
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(content: Content)
     }
 }
