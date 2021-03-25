@@ -371,13 +371,12 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         }
 
         fun setSelectedForeground(@DrawableRes selectedForegroundResId: Int): Builder {
-            setSelectedForeground(
+            return setSelectedForeground(
                 ContextCompat.getDrawable(
                     fragmentActivity,
                     selectedForegroundResId
                 )
             )
-            return this
         }
 
         fun setSelectedForeground(selectedForegroundDrawable: Drawable?): Builder {
