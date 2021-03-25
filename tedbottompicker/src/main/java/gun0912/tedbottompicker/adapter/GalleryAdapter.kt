@@ -12,14 +12,17 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import gun0912.tedbottompicker.Content
 import gun0912.tedbottompicker.R
-import gun0912.tedbottompicker.TedBottomSheetDialogFragment.BaseBuilder
+import gun0912.tedbottompicker.TedBottomPicker
 import gun0912.tedbottompicker.Type
 import java.io.File
 
 /**
  * Created by TedPark on 2016. 8. 30..
  */
-class GalleryAdapter(private val context: Context, private val builder: BaseBuilder<*>) :
+class GalleryAdapter(
+    private val context: Context,
+    private val builder: TedBottomPicker.Builder
+) :
     RecyclerView.Adapter<GalleryViewHolder>() {
     private val pickerTiles = mutableListOf<Content>()
     private var onItemClickListener: OnItemClickListener? = null
