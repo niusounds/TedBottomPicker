@@ -89,7 +89,7 @@ class GalleryAdapter(
         error("use submitContentList")
     }
 
-    interface OnItemClickListener {
+    fun interface OnItemClickListener {
         fun onItemClick(content: Content)
     }
 }

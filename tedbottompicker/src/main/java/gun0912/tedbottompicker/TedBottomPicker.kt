@@ -304,15 +304,15 @@ class TedBottomPicker : BottomSheetDialogFragment() {
     private val isMultiSelect: Boolean
         private get() = builder.onMultiImageSelectedListener != null
 
-    interface OnMultiImageSelectedListener {
+    fun interface OnMultiImageSelectedListener {
         fun onImagesSelected(contents: List<Content>)
     }
 
-    interface OnImageSelectedListener {
+    fun interface OnImageSelectedListener {
         fun onImageSelected(content: Content)
     }
 
-    interface OnErrorListener {
+    fun interface OnErrorListener {
         fun onError(message: String)
     }
 
