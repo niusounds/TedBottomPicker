@@ -171,17 +171,37 @@ class TedBottomPicker : BottomSheetDialogFragment() {
 
     private fun addUri(content: Content) {
         if (selectedUriList.size == builder.selectMaxCount) {
-            val message: String? = if (builder.selectMaxCountErrorText != null) {
-                builder.selectMaxCountErrorText
-            } else {
-                String.format(
-                    resources.getString(R.string.select_max_count),
-                    builder.selectMaxCount
-                )
-            }
+            val message: String = builder.selectMaxCountErrorText ?: String.format(
+                resources.getString(R.string.select_max_count),
+                builder.selectMaxCount
+            )
             Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
             return
         }
+
+        when (content.type) {
+            Type.Image -> {
+                if (selectedUriList.filter { it.type == Type.Image }.size == builder.selectMaxImageCount) {
+                    val message: String = builder.selectMaxImageCountErrorText ?: String.format(
+                        resources.getString(R.string.select_max_images_count),
+                        builder.selectMaxImageCount
+                    )
+                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+            Type.Video -> {
+                if (selectedUriList.filter { it.type == Type.Video }.size == builder.selectMaxVideoCount) {
+                    val message: String = builder.selectMaxVideoCountErrorText ?: String.format(
+                        resources.getString(R.string.select_max_videos_count),
+                        builder.selectMaxVideoCount
+                    )
+                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+        }
+
         selectedUriList.add(content)
         val rootView = LayoutInflater.from(requireContext())
             .inflate(R.layout.tedbottompicker_selected_item, null)
@@ -309,6 +329,8 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         val completeButtonText: String? = null,
         val emptySelectionText: String? = null,
         val selectMaxCountErrorText: String? = null,
+        val selectMaxImageCountErrorText: String? = null,
+        val selectMaxVideoCountErrorText: String? = null,
         val selectMinCountErrorText: String? = null,
         val buttonTextColor: Int? = null,
         val buttonColor: Int? = null,
