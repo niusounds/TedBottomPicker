@@ -13,6 +13,7 @@ import com.bumptech.glide.request.RequestOptions
 import gun0912.tedbottompicker.Content
 import gun0912.tedbottompicker.R
 import gun0912.tedbottompicker.TedBottomPicker
+import gun0912.tedbottompicker.Type
 import gun0912.tedbottompicker.databinding.TedbottompickerGridItemBinding
 
 /**
@@ -37,12 +38,25 @@ class GalleryAdapter(
     private var onItemClickListener: OnItemClickListener? = null
     private var selected: List<Content> = emptyList()
 
-    fun setSelectedUriList(selected: List<Content>, content: Content) {
-        this.selected = selected
+    fun setSelectedUriList(selectedContents: List<Content>, content: Content) {
+        this.selected = selectedContents
+
+        val reachedToSelectMaxCount = selectedContents.size == builder.selectMaxCount
+        val reachedToSelectMaxImageCount =
+            selectedContents.filter { it.type == Type.Image }.size == builder.selectMaxImageCount
+        val reachedToSelectMaxVideoCount =
+            selectedContents.filter { it.type == Type.Video }.size == builder.selectMaxVideoCount
+
         val newList = currentList.map {
+            val selected = selectedContents.contains(it.content)
+            val reachedToMaxSelectCountForType = when (it.content.type) {
+                Type.Image -> reachedToSelectMaxImageCount
+                Type.Video -> reachedToSelectMaxVideoCount
+            }
+
             it.copy(
-                selected = selected.contains(it.content),
-                disabled = !selected.contains(it.content) && selected.size == builder.selectMaxCount,
+                selected = selected,
+                disabled = !selected && (reachedToSelectMaxCount || reachedToMaxSelectCountForType),
             )
         }
         super.submitList(newList)
