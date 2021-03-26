@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<gun0912.tedbottompicker.view.TedSquareFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<gun0912.tedbottompicker.view.TedSquareFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#ccc"
     android:foreground="?android:attr/selectableItemBackground"
     app:matchHeightToWidth="true"
-
     >
 
     <gun0912.tedbottompicker.view.TedSquareImageView
@@ -16,9 +16,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerInside"
-
-
+        tools:src="@drawable/ic_gallery"
         />
 
+    <View
+        android:id="@+id/disable_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99ffffff"
+        />
 
 </gun0912.tedbottompicker.view.TedSquareFrameLayout>

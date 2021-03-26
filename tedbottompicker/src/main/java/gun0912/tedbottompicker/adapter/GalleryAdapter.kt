@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.bumptech.glide.Glide
@@ -38,7 +39,12 @@ class GalleryAdapter(
 
     fun setSelectedUriList(selected: List<Content>, content: Content) {
         this.selected = selected
-        val newList = currentList.map { it.copy(selected = selected.contains(it.content)) }
+        val newList = currentList.map {
+            it.copy(
+                selected = selected.contains(it.content),
+                disabled = !selected.contains(it.content) && selected.size == builder.selectMaxCount,
+            )
+        }
         super.submitList(newList)
     }
 
@@ -65,6 +71,7 @@ class GalleryAdapter(
             ?: ContextCompat.getDrawable(context, R.drawable.gallery_photo_selected)
 
         holder.root.foreground = if (isSelected) foregroundDrawable else null
+        holder.disableOverlay.isVisible = item.disabled
 
         onItemClickListener?.let { listener ->
             holder.itemView.setOnClickListener {
