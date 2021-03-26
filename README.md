@@ -1,6 +1,18 @@
 This is modified from original TedBottomPicker for my app requirements. Below screenshots and instructions are **not always correct.**
 
-- [See changes](https://github.com/ParkSangGwon/TedBottomPicker/compare/master...niusounds:master)
+[See changes](https://github.com/ParkSangGwon/TedBottomPicker/compare/master...niusounds:master)
+
+- Convert to Kotlin
+- Migrate to Android X
+- Use view binding
+- Update build tools version
+- Remove RxJava dependency
+    - Remove TedRxBottomPicker
+- Add `setFilterType`
+- Add `setSelectMaxImageCount`, `setSelectMaxVideoCount`
+- `showMultiImage` callback receive `List<Content>` instead of `List<Uri>`.
+- Change DONE button position from upper right to bottom center of picker.
+
 
 # What is TedBottomPicker?
 In Google's Material Design, Google introduce **Bottom sheets**.([Components – Bottom sheets](https://material.google.com/components/bottom-sheets.html))<br/>
