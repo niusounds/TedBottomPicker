@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/niusounds/TedBottomPicker.svg)](https://jitpack.io/#niusounds/TedBottomPicker)
+
 This is modified from original TedBottomPicker for my app requirements. Below screenshots and instructions are **not always correct.**
 
 [See changes](https://github.com/ParkSangGwon/TedBottomPicker/compare/master...niusounds:master)
