@@ -5,4 +5,5 @@ import android.net.Uri
 data class Content(
     val uri: Uri,
     val type: Type,
+    val duration: Long,
 )

@@ -19,6 +19,17 @@
         tools:src="@drawable/ic_gallery"
         />
 
+    <TextView
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="8dp"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        tools:text="12:34"
+        />
+
     <View
         android:id="@+id/disable_overlay"
         android:layout_width="match_parent"

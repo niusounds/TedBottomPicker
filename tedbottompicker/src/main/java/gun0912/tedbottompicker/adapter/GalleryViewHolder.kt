@@ -1,6 +1,7 @@
 package gun0912.tedbottompicker.adapter
 
 import android.view.View
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import gun0912.tedbottompicker.databinding.TedbottompickerGridItemBinding
 import gun0912.tedbottompicker.view.TedSquareFrameLayout
@@ -11,4 +12,5 @@ class GalleryViewHolder(binding: TedbottompickerGridItemBinding) :
     val root: TedSquareFrameLayout = binding.root
     val thumbnail: TedSquareImageView = binding.ivThumbnail
     val disableOverlay: View = binding.disableOverlay
+    val duration: TextView = binding.duration
 }

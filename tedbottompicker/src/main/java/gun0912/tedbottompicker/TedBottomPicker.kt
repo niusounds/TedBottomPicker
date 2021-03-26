@@ -150,22 +150,37 @@ class TedBottomPicker : BottomSheetDialogFragment() {
         })
     }
 
+    private fun Set<Type>.toSelections(): String {
+        val selections = mutableListOf<String>()
+        if (contains(Type.Image)) {
+            selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE}"
+        }
+        if (contains(Type.Video)) {
+            selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO}"
+        }
+        return selections.joinToString(" OR ")
+    }
+
     private fun initAdapter() {
-        try {
-            val selections = mutableListOf<String>()
-            if (builder.filterType.contains(Type.Image)) {
-                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE}"
-            }
-            if (builder.filterType.contains(Type.Video)) {
-                selections += "${MediaStore.Files.FileColumns.MEDIA_TYPE}=${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO}"
-            }
-            val selection = selections.joinToString(" OR ")
-            val columns = arrayOf(
+        val selection = builder.filterType.toSelections()
+        val orderBy = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+        val uri = MediaStore.Files.getContentUri("external")
+
+        // MediaStore.Files.FileColumns.DURATION requires SDK version 29 but it seems to be available on older Android
+        val columns = try {
+            arrayOf(
                 MediaStore.Files.FileColumns.DATA,
-                MediaStore.Files.FileColumns.MEDIA_TYPE
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.Files.FileColumns.DURATION,
             )
-            val orderBy = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
-            val uri = MediaStore.Files.getContentUri("external")
+        } catch (e: Exception) {
+            arrayOf(
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+            )
+        }
+
+        try {
             requireContext().applicationContext.contentResolver.query(
                 uri,
                 columns,
@@ -174,15 +189,23 @@ class TedBottomPicker : BottomSheetDialogFragment() {
                 orderBy
             )?.use { cursor ->
                 val pickerTiles = mutableListOf<Content>()
+                val dataIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)
+                val mediaTypeIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE)
+
+                // MediaStore.Files.FileColumns.DURATION requires SDK version 29 but it seems to be available on older Android
+                val durationIndex = try {
+                    cursor.getColumnIndex(MediaStore.Files.FileColumns.DURATION)
+                } catch (e: Exception) {
+                    -1
+                }
                 while (cursor.moveToNext()) {
-                    val dataIndex = MediaStore.Files.FileColumns.DATA
-                    val imageLocation = cursor.getString(cursor.getColumnIndex(dataIndex))
-                    val mediaType =
-                        cursor.getInt(cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE))
+                    val imageLocation = cursor.getString(dataIndex)
+                    val mediaType = cursor.getInt(mediaTypeIndex)
                     val imageFile = File(imageLocation)
                     val type =
                         if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) Type.Image else Type.Video
-                    pickerTiles.add(Content(Uri.fromFile(imageFile), type))
+                    val duration = if (durationIndex > 0) cursor.getLong(durationIndex) else 0
+                    pickerTiles.add(Content(Uri.fromFile(imageFile), type, duration))
                 }
                 imageGalleryAdapter.submitContentList(pickerTiles)
             }

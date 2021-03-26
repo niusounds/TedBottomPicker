@@ -86,12 +86,20 @@ class GalleryAdapter(
 
         holder.root.foreground = if (isSelected) foregroundDrawable else null
         holder.disableOverlay.isVisible = item.disabled
+        holder.duration.isVisible = item.content.duration > 0
+        holder.duration.text = toDurationText(item.content.duration)
 
         onItemClickListener?.let { listener ->
             holder.itemView.setOnClickListener {
                 listener.onItemClick(item.content)
             }
         }
+    }
+
+    private fun toDurationText(millis: Long): String {
+        val sec = millis / 1000 % 60
+        val min = millis / 1000 / 60
+        return String.format("%02d:%02d", min, sec)
     }
 
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener?) {
